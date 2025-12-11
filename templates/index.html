@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MoodTune</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h1>MoodTune</h1>
+    <p>Describe how you're feeling, and MoodTune will suggest songs that match your mood.</p>
+
+    <form method="POST" class="mood-form">
+        <textarea name="mood_text" placeholder="I'm feeling...">{{ user_text or '' }}</textarea>
+
+        <div class="genres">
+            <p class="genres-label">Optional: Filter by genres you like</p>
+            <div class="genre-options">
+                <label>
+                    <input type="checkbox" name="genres" value="pop"
+                        {% if selected_genres and 'pop' in selected_genres %}checked{% endif %}>
+                    Pop
+                </label>
+                <label>
+                    <input type="checkbox" name="genres" value="rock"
+                        {% if selected_genres and 'rock' in selected_genres %}checked{% endif %}>
+                    Rock
+                </label>
+                <label>
+                    <input type="checkbox" name="genres" value="indie"
+                        {% if selected_genres and 'indie' in selected_genres %}checked{% endif %}>
+                    Indie
+                </label>
+                <label>
+                    <input type="checkbox" name="genres" value="rnb"
+                        {% if selected_genres and 'rnb' in selected_genres %}checked{% endif %}>
+                    R&B
+                </label>
+                <label>
+                    <input type="checkbox" name="genres" value="hiphop"
+                        {% if selected_genres and 'hiphop' in selected_genres %}checked{% endif %}>
+                    Hip-hop
+                </label>
+                <label>
+                    <input type="checkbox" name="genres" value="electronic"
+                        {% if selected_genres and 'electronic' in selected_genres %}checked{% endif %}>
+                    Electronic
+                </label>
+                <label>
+                    <input type="checkbox" name="genres" value="metal"
+                        {% if selected_genres and 'metal' in selected_genres %}checked{% endif %}>
+                    Metal
+                </label>
+                <label>
+                    <input type="checkbox" name="genres" value="acoustic"
+                        {% if selected_genres and 'acoustic' in selected_genres %}checked{% endif %}>
+                    Acoustic
+                </label>
+            </div>
+        </div>
+
+        <button type="submit">Generate Playlist</button>
+    </form>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    {% if detected_emotion %}
+        <div class="result">
+            <h2>Detected Emotion: {{ detected_emotion }}</h2>
+            <p>Confidence: {{ "%.2f"|format(score * 100) }}%</p>
+            <p>Mapped to Last.fm tag: <strong>{{ tag }}</strong></p>
+
+            {% if ranked_tags %}
+                <div class="mood-breakdown">
+                    <h3>Top mood mix</h3>
+                    <ul>
+                        {% for t, w in ranked_tags %}
+                            <li>
+                                {{ t }} — {{ "%.1f"|format(w * 100) }}%
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if tracks %}
+        <div class="actions">
+            <form method="POST">
+                <input type="hidden" name="mood_text" value="{{ user_text }}">
+                {% for g in selected_genres %}
+                    <input type="hidden" name="genres" value="{{ g }}">
+                {% endfor %}
+                <button type="submit" name="regen" value="1">Regenerate Playlist</button>
+            </form>
+        </div>
+
+        <h2>Recommended Songs</h2>
+        <ul class="songs">
+            {% for t in tracks %}
+                <li>
+                    <!-- Always show grey star placeholder -->
+                    <div class="song-art-placeholder">★</div>
+                    <div>
+                        <a href="{{ t.spotify_url }}" target="_blank"><strong>{{ t.name }}</strong></a>
+                        <span> by {{ t.artist }}</span><br>
+                        <small>
+                            <a href="{{ t.url }}" target="_blank">View on Last.fm</a>
+                            {% if t.playcount %}
+                                · Playcount: {{ t.playcount }}
+                            {% endif %}
+                        </small>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+</body>
+</html>
