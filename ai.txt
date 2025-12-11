@@ -1,0 +1,8 @@
+I used AI to:
+    help me design my style.css file
+    ask what inputs I need for my index.html and check my syntax
+    check all syntax
+    explain error codes and where/why they might have occurred
+    help dubug app.py when errors came up
+    help integrate hugging face api correctly
+
